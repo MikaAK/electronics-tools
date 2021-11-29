@@ -35,6 +35,10 @@ defmodule GearMath.Planetary do
     }
   end
 
+  def ring_pitch_diameter(%Planetary{module: module, ring_teeth: ring_teeth}) do
+    GearMath.pitch_diameter(module, ring_teeth)
+  end
+
   def ring_teeth(sun_teeth, planet_teeth) do
     sun_teeth + 2 * planet_teeth
   end
