@@ -6,11 +6,15 @@ defmodule GearMath.Planetary do
   @min_gear_teeth 4
   @planet_range 2..20
 
-  def possibilities(pitch_diameter) do
+  def possibilities(pitch_diameter, {module_min, module_max} \\ {0, 0}) do
     mod_num_teeth_pairs = GearMath.module_teeth_possibilities(pitch_diameter)
 
     Enum.flat_map(mod_num_teeth_pairs, fn {module, num_teeth} ->
-      possibilities_for_ring(module, num_teeth)
+      if module > module_min and module < module_max do
+        possibilities_for_ring(module, num_teeth)
+      else
+        []
+      end
     end)
   end
 
