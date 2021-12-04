@@ -24,6 +24,8 @@ defmodule GearMath do
 
   def addendum(pitch_diameter, module), do: pitch_diameter + (1 * module)
   def dedendum(pitch_diameter, module), do: pitch_diameter - (1.25 * module)
+  def inner_ring_dedendum(pitch_diameter, module), do: pitch_diameter - (1 * module * 2)
+  def inner_ring_addendum(pitch_diameter, module), do: pitch_diameter + (1.25 * module * 2)
 
   def distance_between_shafts(pitch_diameter_a, pitch_diameter_b) do
     (pitch_diameter_a / 2) + (pitch_diameter_b / 2)

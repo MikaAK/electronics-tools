@@ -5,9 +5,14 @@ defmodule GearMath.Planetary.Compound do
 
   def new!(%Planetary{} = input_planetary, %Planetary{} = output_planetary) do
     %Planetary.Compound{
+      ratio: ratio(input_planetary, output_planetary),
       input_planetary: input_planetary,
-      output_planetary: Map.put(output_planetary, :module, output_module(input_planetary, output_planetary)),
-      ratio: ratio(input_planetary, output_planetary)
+      output_planetary: Planetary.new(
+        output_planetary.sun.tooth_count,
+        output_planetary.planet.tooth_count,
+        output_module(input_planetary, output_planetary),
+        output_planetary.num_planets
+      )
     }
   end
 
