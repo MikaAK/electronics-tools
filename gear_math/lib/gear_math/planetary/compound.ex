@@ -1,7 +1,22 @@
 defmodule GearMath.Planetary.Compound do
-  alias GearMath.Planetary
+  alias GearMath.{Gear, Planetary}
 
   defstruct [:input_planetary, :output_planetary, :ratio]
+
+  def new!(%Planetary{} = input_planetary, %Planetary{} = output_planetary) do
+    %Planetary.Compound{
+      input_planetary: input_planetary,
+      output_planetary: Map.put(output_planetary, :module, output_module(input_planetary, output_planetary)),
+      ratio: ratio(input_planetary, output_planetary)
+    }
+  end
+
+  def new(%Planetary{} = input_planetary, %Planetary{} = output_planetary) do
+    {:ok, new!(input_planetary, output_planetary)}
+
+    rescue
+      ArithmeticError -> {:error, ErrorMessage.bad_request("invalid ratio", %{detailed_code: :invalid_ratio})}
+  end
 
   def possibilities(pitch_diameter, module_limit \\ {0, 0})
 
@@ -25,41 +40,39 @@ defmodule GearMath.Planetary.Compound do
     possibilities(Planetary.ring_pitch_diameter(input_planetary), module_limit)
   end
 
-  def new!(%Planetary{} = input_planetary, %Planetary{} = output_planetary) do
-    %Planetary.Compound{
-      input_planetary: input_planetary,
-      output_planetary: Map.put(output_planetary, :module, output_module(input_planetary, output_planetary)),
-      ratio: ratio(input_planetary, output_planetary)
-    }
-  end
-
-  def new(%Planetary{} = input_planetary, %Planetary{} = output_planetary) do
-    {:ok, new!(input_planetary, output_planetary)}
-
-    rescue
-      ArithmeticError -> {:error, ErrorMessage.bad_request("invalid ratio", %{detailed_code: :invalid_ratio})}
-  end
-
   def valid_gearset?(%Planetary.Compound{
-    input_planetary: %Planetary{num_planets: input_num_planets, ring_teeth: input_ring_teeth},
-    output_planetary: %Planetary{num_planets: output_num_planets, ring_teeth: output_ring_teeth}
+    input_planetary: %Planetary{
+      num_planets: input_num_planets,
+      ring: %Gear{tooth_count: input_ring_teeth}
+    },
+
+    output_planetary: %Planetary{
+      num_planets: output_num_planets,
+      ring: %Gear{tooth_count: output_ring_teeth}
+    }
   }) do
     input_num_planets === output_num_planets and input_ring_teeth === output_ring_teeth
   end
 
   def output_module(%Planetary{
-    sun_teeth: input_sun_teeth,
-    planet_teeth: input_planet_teeth,
+    sun: %Gear{tooth_count: input_sun_teeth},
+    planet: %Gear{tooth_count: input_planet_teeth},
     module: input_module
-  }, %Planetary{sun_teeth: output_sun_teeth, planet_teeth: output_planet_teeth}) do
+  }, %Planetary{
+    sun: %Gear{tooth_count: output_sun_teeth},
+    planet: %Gear{tooth_count: output_planet_teeth}
+  }) do
     ((input_sun_teeth + input_planet_teeth) / (output_sun_teeth + output_planet_teeth)) * input_module
   end
 
   def ratio(%Planetary{
-    ring_teeth: ring_teeth_1,
-    sun_teeth: sun_teeth_1,
-    planet_teeth: planet_teeth_1
-  }, %Planetary{ring_teeth: ring_teeth_2, planet_teeth: planet_teeth_2}) do
+    ring: %Gear{tooth_count: ring_teeth_1},
+    sun: %Gear{tooth_count: sun_teeth_1},
+    planet: %Gear{tooth_count: planet_teeth_1}
+  }, %Planetary{
+    ring: %Gear{tooth_count: ring_teeth_2},
+    planet: %Gear{tooth_count: planet_teeth_2}
+  }) do
     {output_rotations, input_rotations} = ((1 + (ring_teeth_1 / sun_teeth_1)) / (1 - (ring_teeth_1 * planet_teeth_2) / (ring_teeth_2 * planet_teeth_1)))
       |> Float.round(5)
       |> Float.ratio
