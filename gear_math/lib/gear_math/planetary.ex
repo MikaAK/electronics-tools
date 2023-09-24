@@ -1,18 +1,34 @@
 defmodule GearMath.Planetary do
   alias GearMath.{Planetary, Utils, Gear}
 
-  defstruct [:planet, :ring, :sun, :module, :num_planets, :planet_to_sun_shaft_distance]
+  defstruct [
+    :planet,
+    :ring,
+    :sun,
+    :module,
+    :num_planets,
+    :planet_to_sun_shaft_distance,
+    :sun_input_ring_output_ratio,
+    :sun_input_planet_output_ratio,
+    :planet_input_ring_output_ratio,
+    :planet_input_sun_output_ratio
+  ]
 
   @min_gear_teeth 4
   @planet_range 2..20
 
   def new(sun_teeth, planet_teeth, module, num_planets) do
+    ring_teeth = ring_teeth(sun_teeth, planet_teeth)
     %Planetary{
       module: module,
       num_planets: num_planets,
       planet: Gear.new(planet_teeth, module),
       sun: Gear.new(sun_teeth, module),
-      ring: Gear.new(ring_teeth(sun_teeth, planet_teeth), module, true),
+      sun_input_ring_output_ratio: GearMath.gear_ratio(sun_teeth, ring_teeth),
+      sun_input_planet_output_ratio: GearMath.gear_ratio(sun_teeth, planet_teeth),
+      planet_input_ring_output_ratio: GearMath.gear_ratio(planet_teeth, ring_teeth),
+      planet_input_sun_output_ratio: GearMath.gear_ratio(planet_teeth, sun_teeth),
+      ring: Gear.new(ring_teeth, module, true),
       planet_to_sun_shaft_distance: GearMath.distance_between_shafts(
         GearMath.pitch_diameter(module, planet_teeth),
         GearMath.pitch_diameter(module, sun_teeth)
@@ -24,7 +40,7 @@ defmodule GearMath.Planetary do
     mod_num_teeth_pairs = GearMath.module_teeth_possibilities(pitch_diameter)
 
     Enum.flat_map(mod_num_teeth_pairs, fn {module, num_teeth} ->
-      if module > module_min and module < module_max do
+      if module >= module_min and module <= module_max do
         possibilities_for_ring(module, num_teeth)
       else
         []

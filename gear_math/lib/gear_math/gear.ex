@@ -27,4 +27,9 @@ defmodule GearMath.Gear do
       dedendum: dedendum
     }
   end
+
+  # Theta
+  def helical_gear_sweep_angle(height, degree_of_helix \\ 45, module, num_teeth) do
+    (360 * height * :math.tanh(degree_of_helix)) / (module * num_teeth * :math.pi())
+  end
 end

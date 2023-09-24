@@ -37,7 +37,7 @@ defmodule GearMath.Planetary.Compound do
           |> Stream.map(fn {:ok, planetary} -> planetary end)
           |> Stream.filter(&(&1.output_planetary.module > module_min and &1.output_planetary.module < module_max))
           |> Enum.filter(&valid_gearset?/1)
-      end, max_concurrency: 50)
+      end, max_concurrency: System.schedulers_online() * 20)
       |> Enum.reduce([], fn ({:ok, valid_compounds}, acc) -> Enum.concat(acc, valid_compounds) end)
   end
 

@@ -34,4 +34,8 @@ defmodule GearMath do
   def valid_gearset?(shaft_distance, module, teeth_a, teeth_b) do
     ((2 * shaft_distance) / module) == teeth_a + teeth_b
   end
+
+  def gear_ratio(input_gear_teeth, output_gear_teeth) do
+    output_gear_teeth / input_gear_teeth
+  end
 end
