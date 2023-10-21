@@ -15,7 +15,7 @@ defmodule GearMath.Planetary do
   ]
 
   @min_gear_teeth 4
-  @planet_range 2..20
+  @planet_range 3..20
 
   def new(sun_teeth, planet_teeth, module, num_planets) do
     ring_teeth = ring_teeth(sun_teeth, planet_teeth)

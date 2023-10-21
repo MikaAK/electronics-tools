@@ -5,7 +5,7 @@ defmodule GearMath.Planetary.Compound do
 
   def new!(%Planetary{} = input_planetary, %Planetary{} = output_planetary) do
     %Planetary.Compound{
-      ratio: ratio(input_planetary, output_planetary),
+      ratio: {ring_output_ratio(input_planetary, output_planetary), sun_output_ratio(input_planetary, output_planetary)},
       input_planetary: input_planetary,
       output_planetary: Planetary.new(
         output_planetary.sun.tooth_count,
@@ -70,7 +70,7 @@ defmodule GearMath.Planetary.Compound do
     ((input_sun_teeth + input_planet_teeth) / (output_sun_teeth + output_planet_teeth)) * input_module
   end
 
-  def ratio(%Planetary{
+  def ring_output_ratio(%Planetary{
     ring: %Gear{tooth_count: ring_teeth_1},
     sun: %Gear{tooth_count: sun_teeth_1},
     planet: %Gear{tooth_count: planet_teeth_1}
@@ -82,6 +82,21 @@ defmodule GearMath.Planetary.Compound do
       |> Float.round(5)
       |> Float.ratio
 
-    {output_rotations / input_rotations, 1}
+    output_rotations / input_rotations
+  end
+
+  def sun_output_ratio(%Planetary{
+    ring: %Gear{tooth_count: ring_teeth_1},
+    sun: %Gear{tooth_count: sun_teeth_1},
+    planet: %Gear{tooth_count: planet_teeth_1}
+  }, %Planetary{
+    sun: %Gear{tooth_count: sun_teeth_2},
+    planet: %Gear{tooth_count: planet_teeth_2}
+  }) do
+    {output_rotations, input_rotations} = ((1 + (ring_teeth_1 / sun_teeth_1)) / (1 - (ring_teeth_1 * planet_teeth_2) / (sun_teeth_2 * planet_teeth_1)))
+      |> Float.round(5)
+      |> Float.ratio
+
+    output_rotations / input_rotations
   end
 end

@@ -3,7 +3,7 @@ defmodule GearMath.Utils do
 
   def sin_deg(degree), do: :math.sin(degree / @rad_in_deg)
 
-  def divisible_by(value, divisor) do
+  def divisible_by?(value, divisor) do
     value
       |> to_string
       |> Decimal.new
@@ -12,7 +12,7 @@ defmodule GearMath.Utils do
   end
 
   def real_number?(value) do
-    divisible_by(value, 1)
+    divisible_by?(value, 1)
   end
 
   def generate_numbers_between(first, last, step) do
