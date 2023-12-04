@@ -1,7 +1,7 @@
 defmodule GearMath.Utils do
-  @rad_in_deg 180 / :math.pi()
+  @rad_in_deg :math.pi() / 180
 
-  def sin_deg(degree), do: :math.sin(degree / @rad_in_deg)
+  def sin_deg(degree), do: :math.sin(degree * @rad_in_deg)
 
   def divisible_by?(value, divisor) do
     value

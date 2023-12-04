@@ -36,23 +36,29 @@ defmodule GearMath.Planetary do
     }
   end
 
-  def possibilities(pitch_diameter, {module_min, module_max} \\ {0, 0}) do
+  def possibilities(pitch_diameter, {module_min, module_max} \\ {0, 0}, pressure_angle \\ 20) do
     mod_num_teeth_pairs = GearMath.module_teeth_possibilities(pitch_diameter)
 
     Enum.flat_map(mod_num_teeth_pairs, fn {module, num_teeth} ->
+      # min_tooth_count = GearMath.minimum_tooth_count(module, pressure_angle)
+
+      # Add this at the end for anti-backlash gears
+      # num_teeth >= min_tooth_count
       if module >= module_min and module <= module_max do
-        possibilities_for_ring(module, num_teeth)
+        possibilities_for_ring(module, num_teeth, pressure_angle)
       else
         []
       end
     end)
   end
 
-  def possibilities_for_ring(module, num_teeth) do
+  def possibilities_for_ring(module, num_teeth, pressure_angle \\ 20) do
+    _min_tooth_count = GearMath.minimum_tooth_count(module, pressure_angle)
+
     possibilities = for sun_teeth when sun_teeth >= @min_gear_teeth <- 1..num_teeth,
                         planet_teeth when planet_teeth >= @min_gear_teeth <- num_teeth..1,
                         num_planets <- @planet_range,
-                        ring_teeth(sun_teeth, planet_teeth) === num_teeth do
+      ring_teeth(sun_teeth, planet_teeth) === num_teeth do # added for anti-backlash  and planet_teeth > min_tooth_count and sun_teeth > min_tooth_count
       new(sun_teeth, planet_teeth, module, num_planets)
     end
 

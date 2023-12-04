@@ -1,0 +1,78 @@
+# Gear Math
+
+```elixir
+Mix.install([{:gear_math, path: "~/Documents/electronics-helpers/gear_math/"}])
+```
+
+## Generate Possibilities for Module & Tooth Count
+
+```elixir
+ring_diameter = 100
+
+ring_diameter
+|> GearMath.module_teeth_possibilities()
+# |> Enum.filter(fn {module, tooth_count} ->
+#   # module === 1.0
+# end)
+|> Enum.uniq()
+|> GearMath.group_pitch_diameter_possibilities_by_module()
+
+# |> Enum.filter(fn {{module, min_tooth_count}, num_teeth} ->
+# GearMath.Utils.real_number?(module)
+# end)
+```
+
+## Generate Planetary Possibilities
+
+```elixir
+planetary_possibilities = GearMath.Planetary.possibilities(ring_diameter, {1, 5})
+```
+
+```elixir
+final_choices =
+  planetary_possibilities
+  |> Enum.filter(
+    &(&1.sun_input_ring_output_ratio >= 6.0 and &1.module >= 2.15 && &1.ring.addendum <= 100)
+  )
+  |> Enum.sort_by(& &1.sun_input_ring_output_ratio, :desc)
+
+# |> Enum.map(&(&1.module))
+```
+
+```elixir
+choice = List.last(final_choices)
+height = 9
+
+%{
+  sun_helix_beta:
+    GearMath.Gear.helical_gear_sweep_angle(height, choice.module, choice.sun.tooth_count),
+  planet_helix_beta:
+    GearMath.Gear.helical_gear_sweep_angle(height, choice.module, choice.planet.tooth_count),
+  ring_helix_beta:
+    GearMath.Gear.helical_gear_sweep_angle(height, choice.module, choice.ring.tooth_count)
+}
+```
+
+## Generate Compound Planetary Possibilities
+
+```elixir
+compound_possibilities = GearMath.Planetary.Compound.possibilities(ring_diameter, {1, 4})
+```
+
+```elixir
+compound_possibilities
+|> Enum.filter(fn %GearMath.Planetary.Compound{
+                    ratio: {_ring_ratio, sun_ratio},
+                    input_planetary: input_planetary,
+                    output_planetary: output_planetary
+                  } ->
+  input_planetary.num_planets >= 3 &&
+    GearMath.Utils.real_number?(sun_ratio) &&
+    GearMath.Utils.divisible_by?(input_planetary.module, Decimal.from_float(0.25)) &&
+    GearMath.Utils.divisible_by?(output_planetary.module, Decimal.from_float(0.25)) &&
+    sun_ratio === 6.0
+end)
+# |> Enum.map(&(&1.ratio))
+|> Enum.uniq()
+|> Enum.sort()
+```
